@@ -1,0 +1,233 @@
+body {
+  background: linear-gradient(135deg, #000, #1a1a1a);
+  color: #fff;
+  font-family: 'Rubik', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.login-container {
+  background: rgba(20, 20, 20, 0.95);
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 400px;
+  
+  body {
+    background: linear-gradient(135deg, #000, #1a1a1a);
+    color: #fff;
+    font-family: 'Rubik', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  
+  .container {
+    background: rgba(20, 20, 20, 0.95);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    border: 2px solid rgba(255, 0, 0, 0.7);
+  }
+  
+  .title {
+    font-family: 'Black Ops One', cursive;
+    font-size: 28px;
+    text-transform: uppercase;
+    color: #ff0000;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+    margin-bottom: 20px;
+  }
+  
+  .input-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    width: 100%;
+  }
+  
+  .input-field {
+    flex-grow: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #333;
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    margin-right: 10px;
+  }
+  
+  .check-button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background: #ff4444;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 100px;
+  }
+  
+  .check-button:hover {
+    background: #cc0000;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+  }
+  
+  .button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  
+  .submit-button {
+    background: #222;
+    color: #fff;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .login-button {
+    background: #ff0000;
+    color: #fff;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .login-button:hover {
+    background: #cc0000;
+  }
+  
+  .success-message {
+    color: #00ff00;
+    margin-top: 10px;
+  }
+  
+  .error-message {
+    color: #ff4444;
+    margin-top: 10px;
+  }
+  
+  .redirect-message {
+    color: #ffcc00;
+    margin-top: 10px;
+  }
+  
+  width: 100%;
+  border: 2px solid rgba(255, 0, 0, 0.7);
+}
+
+.login-title {
+  font-family: 'Black Ops One', cursive;
+  font-size: 28px;
+  text-transform: uppercase;
+  color: #ff0000;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+  margin-bottom: 20px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 8px;
+  background: #333;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+}
+
+.login-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #ff0000;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.login-button:hover {
+  background: #cc0000;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+}
+
+.success-message {
+  color: #00ff00;
+  margin-top: 10px;
+}
+
+.error-message {
+  color: #ff4444;
+  margin-top: 10px;
+}
+
+.login-actions button {
+  background: none;
+  border: none;
+  color: #ff4444;
+  cursor: pointer;
+  margin: 5px;
+  font-size: 14px;
+}
+
+.login-actions button:hover {
+  text-decoration: underline;
+}
+
+.oauth-login {
+  margin-top: 20px;
+}
+
+.kakao-login-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #ffcc00;
+  color: #3c1e1e;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+
+.kakao-login-button:hover {
+  background: #e6b800;
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+}

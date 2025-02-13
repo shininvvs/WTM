@@ -1,0 +1,42 @@
+.find-container {
+    background-color: #1e1e1e;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+    width: 350px;
+    text-align: center;
+    color: white;
+  }
+  
+  .find-container h2 {
+    color: #ff4747;
+    text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.6);
+  }
+  
+  .find-container input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #2e2e2e;
+    color: white;
+  }
+  
+  .find-container button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .find-container button:hover {
+    background-color: #ff4747;
+    color: white;
+  }
+  

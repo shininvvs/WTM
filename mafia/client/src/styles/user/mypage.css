@@ -1,0 +1,83 @@
+/* 전체 컨테이너 */
+.mypage-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  /* 제목 */
+  .mypage-container h2 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  /* 사용자 정보 */
+  .mypage-info p {
+    font-size: 16px;
+    margin: 8px 0;
+    color: #555;
+  }
+  
+  /* 입력 필드 */
+  .mypage-container input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  /* 버튼 스타일 */
+  .mypage-container button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .mypage-container button:hover {
+    background: #0056b3;
+  }
+  
+  /* 회원 탈퇴 버튼 (빨간색) */
+  .delete-button {
+    background: #dc3545;
+  }
+  
+  .delete-button:hover {
+    background: #b02a37;
+  }
+  
+  /* 뒤로가기 버튼 */
+  .back-button {
+    background: #6c757d;
+  }
+  
+  .back-button:hover {
+    background: #5a6268;
+  }
+  
+  /* 비밀번호 변경 메시지 */
+  .message {
+    margin-top: 10px;
+    font-size: 14px;
+    color: green;
+  }
+  
+  /* 에러 메시지 */
+  .error-message {
+    color: red;
+  }
+  

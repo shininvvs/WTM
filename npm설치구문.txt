@@ -1,0 +1,55 @@
+npm install
+# 프로젝트의 package.json에 정의된 모든 의존성을 설치하게 됨.
+
+npm install socket.io
+# 서버에서 WebSocket을 활용할 수 있도록 socket.io를 설치하게 됨.
+
+npm i express
+# Node.js에서 웹 서버를 쉽게 만들 수 있도록 도와주는 Express.js를 설치하게 됨.
+
+npm i vite-express
+# Vite 개발 서버와 Express.js를 함께 사용할 수 있도록 도와주는 패키지를 설치하게 됨.
+
+npm i socket.io-client
+# 클라이언트 측에서 WebSocket을 사용하기 위해 socket.io-client를 설치하게 됨.
+
+npm install react-router-dom
+# React 애플리케이션에서 라우팅 기능을 구현할 수 있도록 react-router-dom을 설치하게 됨.
+
+npm install axios react-router-dom
+# axios(HTTP 요청을 보내는 라이브러리)와 react-router-dom을 동시에 설치하게 됨.
+
+npm install express mysql2 cors body-parser
+# - express: Node.js 웹 서버 프레임워크를 제공하게 됨.
+# - mysql2: MySQL과 Node.js를 연결하는 드라이버 역할을 하게 됨.
+# - cors: CORS(Cross-Origin Resource Sharing) 문제를 해결하는 미들웨어를 추가하게 됨.
+# - body-parser: 요청 본문을 파싱하여 req.body로 사용할 수 있도록 도와주게 됨.
+
+npm install bcrypt
+# 비밀번호를 안전하게 저장하기 위해 해싱 기능을 제공하는 bcrypt 패키지를 설치하게 됨.
+
+// 25.01.16 윤홍문 > .env 파일에 sql 접속 설정 저장해놓고 server.cjs 파일에서 꺼내쓰는 용도
+npm install dotenv
+
+// 템플릿엔진 사용할 때 필요한 모듈 설치
+npm install ejs
+
+// 이메일 인증
+npm install nodemailer
+
+// 구글 로그인 라이브러리
+npm install @react-oauth/google
+
+// 구글 로그인 사용자 정보 확인
+npm install jwt-decode
+
+
+// .env 코드
+PORT=3000
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=MySQL 비밀번호
+DB_NAME=mafia
+DB_PORT=3306
+EMAIL_USER=whoisthemafia1227@gmail.com
+EMAIL_PASS=bhfnqnyqenqfbqon
