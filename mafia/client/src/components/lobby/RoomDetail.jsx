@@ -1,14 +1,44 @@
-// RoomDetail.jsx
+// src/components/lobby/RoomDetail.jsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
-import MafiaVote from "./MafiaVote"; // MafiaVote 컴포넌트 임포트
-import CitizenVote from "../vote/citizenVote"; // citizenVote 컴포넌트 임포트
-import DoctorVote from "../vote/DoctorVote"; // DoctorVote 컴포넌트 임포트
+import MafiaVote from "../vote/MafiaVote"; // 원본대로 MafiaVote 사용
+import CitizenVote from "../vote/citizenVote";
+import DoctorVote from "../vote/DoctorVote";
+import MafiaChat from "../chat/mafiaChat";
 
-// 경찰 조사를 위한 모달 컴포넌트
+// 경찰 조사 모달 컴포넌트
 const InvestigationModal = ({ activePlayers, onInvestigate, onClose, investigationDone }) => {
+  const modalOverlayStyle = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+    color: "#000",
+  };
+  const modalStyle = {
+    backgroundColor: "#fff",
+    padding: "20px",
+    borderRadius: "8px",
+    width: "300px",
+    textAlign: "center",
+    color: "#000",
+  };
+  const closeButtonStyle = {
+    marginTop: "15px",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    padding: "5px 10px",
+    borderRadius: "4px",
+  };
   return (
     <div className="modal-overlay" style={modalOverlayStyle}>
       <div className="modal" style={modalStyle}>
@@ -18,124 +48,251 @@ const InvestigationModal = ({ activePlayers, onInvestigate, onClose, investigati
             <li key={idx}>
               {player}
               <button
+                type="button"
                 disabled={investigationDone}
                 onClick={() => onInvestigate(player)}
-                style={{ marginLeft: "10px" }}
+                style={{
+                  marginLeft: "10px",
+                  backgroundColor: "#007bff",
+                  color: "#fff",
+                  border: "none",
+                  padding: "5px 10px",
+                  borderRadius: "4px",
+                }}
               >
                 조사
               </button>
             </li>
           ))}
         </ul>
-        <button onClick={onClose} style={closeButtonStyle}>
-          닫기
-        </button>
+        <button type="button" onClick={onClose} style={closeButtonStyle}>닫기</button>
       </div>
     </div>
   );
 };
 
-// 모달에 적용할 간단한 인라인 스타일 (원하는 CSS로 변경 가능)
-const modalOverlayStyle = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "rgba(0,0,0,0.5)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  zIndex: 1000,
+// 방장 추방 모달 컴포넌트
+const KickModal = ({ activePlayers, onKick, onClose }) => {
+  const modalOverlayStyle = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+    color: "#000",
+  };
+  const modalStyle = {
+    backgroundColor: "#fff",
+    padding: "20px",
+    borderRadius: "8px",
+    width: "300px",
+    textAlign: "center",
+    color: "#000",
+  };
+  const closeButtonStyle = {
+    marginTop: "15px",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    padding: "5px 10px",
+    borderRadius: "4px",
+  };
+  return (
+    <div className="modal-overlay" style={modalOverlayStyle}>
+      <div className="modal" style={modalStyle}>
+        <h3>추방할 플레이어를 선택하세요</h3>
+        <ul>
+          {activePlayers.map((player, idx) => (
+            <li key={idx}>
+              {player}
+              <button
+                type="button"
+                onClick={() => onKick(player)}
+                style={{
+                  marginLeft: "10px",
+                  backgroundColor: "#007bff",
+                  color: "#fff",
+                  border: "none",
+                  padding: "5px 10px",
+                  borderRadius: "4px",
+                }}
+              >
+                추방
+              </button>
+            </li>
+          ))}
+        </ul>
+        <button type="button" onClick={onClose} style={closeButtonStyle}>닫기</button>
+      </div>
+    </div>
+  );
 };
 
-const modalStyle = {
-  backgroundColor: "#fff",
-  padding: "20px",
-  borderRadius: "8px",
-  width: "300px",
-  textAlign: "center",
+// 채팅 컨테이너 컴포넌트 (원본 그대로)
+const ChatContainer = ({ messages, userInput, setUserInput, sendMessage }) => {
+  return (
+    <div className="chat-container">
+      <ul className="message-list">
+        {messages.map((m, index) => (
+          <li key={index} className="chat-message">
+            <span className="chat-username">{m.nickname}:</span> {m.message}
+          </li>
+        ))}
+      </ul>
+      <input
+        type="text"
+        placeholder="메시지 입력..."
+        value={userInput}
+        onChange={(e) => setUserInput(e.target.value)}
+        className="input-field"
+      />
+      <button type="button" onClick={sendMessage} className="btn send-btn">보내기</button>
+    </div>
+  );
 };
 
-const closeButtonStyle = {
-  marginTop: "15px",
+// 연결 버튼 컴포넌트 (수정됨: handleExitRoom prop 추가)
+const ConnectionButtons = ({ connectToChatServer, disconnectFromChatServer, handleExitRoom }) => {
+  return (
+    <div className="connection-buttons">
+      <button type="button" onClick={connectToChatServer} className="btn connect-btn">준비</button>
+      <button type="button" onClick={disconnectFromChatServer} className="btn disconnect-btn">준비 해제</button>
+      <button type="button" onClick={handleExitRoom} className="">나가기</button>
+    </div>
+  );
+};
+
+// 방장 전용 게임 컨트롤 컴포넌트 (원본 그대로)
+const GameControl = ({ isHost, count, gameStarted, startGame }) => {
+  return (
+    <>
+      {isHost && count >= 4 && !gameStarted && (
+        <button type="button" onClick={startGame} className="btn start-game-btn">게임 시작</button>
+      )}
+    </>
+  );
+};
+
+// 의사 살리기 모달 컴포넌트
+const DoctorSaveModal = ({ activePlayers, onSave, onClose, saveDone }) => {
+  const modalOverlayStyle = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+    color: "#000",
+  };
+  const modalStyle = {
+    backgroundColor: "#fff",
+    padding: "20px",
+    borderRadius: "8px",
+    width: "300px",
+    textAlign: "center",
+    color: "#000",
+  };
+  const closeButtonStyle = {
+    marginTop: "15px",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    padding: "5px 10px",
+    borderRadius: "4px",
+  };
+  return (
+    <div className="modal-overlay" style={modalOverlayStyle}>
+      <div className="modal" style={modalStyle}>
+        <h3>살릴 플레이어를 선택하세요</h3>
+        <ul>
+          {activePlayers.map((player, idx) => (
+            <li key={idx}>
+              {player}
+              <button
+                type="button"
+                disabled={saveDone}
+                onClick={() => onSave(player)}
+                style={{
+                  marginLeft: "10px",
+                  backgroundColor: "#007bff",
+                  color: "#fff",
+                  border: "none",
+                  padding: "5px 10px",
+                  borderRadius: "4px",
+                }}
+              >
+                살리기
+              </button>
+            </li>
+          ))}
+        </ul>
+        <button type="button" onClick={onClose} style={closeButtonStyle}>닫기</button>
+      </div>
+    </div>
+  );
 };
 
 const RoomDetail = () => {
   const { roomId } = useParams();
+  const navigate = useNavigate();
   const [room, setRoom] = useState(null);
   const [roomTitle, setRoomTitle] = useState("");
   const [message, setMessage] = useState("");
 
-  // 채팅 및 소켓 관련 상태 변수들
+  // 소켓 및 채팅 상태
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
-  const [nickname, setNickname] = useState(""); // 닉네임 저장
+  const [nickname, setNickname] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [role, setRole] = useState("");
   const [isHost, setIsHost] = useState(false);
-  const [count, setCount] = useState(0); // 이 count는 소켓에서 받은 인원수로만 업데이트됩니다.
+  const [count, setCount] = useState(0);
   const [phase, setPhase] = useState("");
   const [activePlayers, setActivePlayers] = useState([]);
   const [investigationDone, setInvestigationDone] = useState(false);
+  const [saveDone, setSaveDone] = useState(false);
   const [assassinationDone, setAssassinationDone] = useState(false);
-  const [showCitizenVoteModal, setShowCitizenVoteModal] = useState(false); // 시민 투표 모달 표시 여부
-  const [voteDone, setVoteDone] = useState(false); // 투표 완료 여부
-  const [showDoctorModal, setShowDoctorModal] = useState(false); // 의사 투표 모달 표시시
-  const [saveDone, setSaveDone] = useState(false); // 의사 투표 완료 여부
+  const [skipUsed, setSkipUsed] = useState(false);
 
-
-  // 모달 표시 여부 (경찰 조사 모달)
+  // 모달 상태
   const [showInvestigationModal, setShowInvestigationModal] = useState(false);
+  const [showKickModal, setShowKickModal] = useState(false);
+  const [showDoctorSaveModal, setShowDoctorSaveModal] = useState(false);
 
-  // 컴포넌트 마운트 시 localStorage에서 닉네임 가져오기
+
   useEffect(() => {
     const storedNickname = localStorage.getItem("user_nickname");
-    if (storedNickname) {
-      setNickname(storedNickname);
-    }
+    if (storedNickname) setNickname(storedNickname);
   }, []);
 
-  // roomId에 따라 방 정보를 서버에서 가져오기
-  // ※ 현재 인원(count)은 DB의 값이 아닌, 소켓에서 연결된 사용자 수만 표시하도록 처리합니다.
   useEffect(() => {
     const fetchRoomData = async () => {
       try {
         const res = await axios.get(`http://localhost:3000/room/${roomId}`);
-        console.log("API 응답 데이터:", res.data);
         if (res.data.success) {
-          console.log("현재 DB에서 받아온 room:", res.data.room);
           setRoom(res.data.room);
           setRoomTitle(res.data.room.room_name);
-          // setCount(res.data.room.current_users); // 주석 처리: DB의 인원수 대신 소켓 연결 인원만 사용
         } else {
           setMessage("방 정보를 불러오는 데 실패했습니다.");
         }
       } catch (err) {
-        console.error("방 데이터 오류:", err);
         setMessage("방 데이터 로딩 실패");
       }
     };
     fetchRoomData();
   }, [roomId]);
 
-  // 시민 투표
-  const handleCitizenVote = (targetPlayer) => {
-    if (!socket || !socket.connected) {
-      console.log("소켓이 연결되지 않았습니다.");
-      return;
-    }
-    setVoteDone(true);
-    socket.emit("citizen vote", targetPlayer, (response) => {
-      console.log("시민 투표 응답:", response);
-      alert(response.message);
-    });
-  };
-  
-
-  // ----- 수동 소켓 연결 및 해제 함수 (준비/준비 해제 버튼) -----
   const connectToChatServer = () => {
     if (!nickname.trim()) {
       alert("닉네임을 입력하세요!");
@@ -145,92 +302,77 @@ const RoomDetail = () => {
       console.log("이미 연결된 상태입니다.");
       return;
     }
-
     const _socket = io("http://localhost:3000", {
       autoConnect: false,
       query: { nickname, roomId },
     });
     _socket.connect();
     setSocket(_socket);
-
     _socket.on("connect", () => {
       console.log(`${nickname}님이 방(${roomId})에 입장`);
       setIsConnected(true);
       _socket.emit("joinRoom", roomId);
     });
-
     _socket.on("disconnect", () => {
       console.log("소켓 연결 끊김");
       setIsConnected(false);
     });
-
-    // 오직 해당 roomId의 메시지만 처리
     _socket.on("new message", (msg) => {
       if (msg.roomId === roomId) {
         console.log(`방(${roomId})에서 받은 메시지:`, msg);
         setMessages((prev) => [...prev, msg]);
       }
     });
-
-    // 기타 이벤트 등록
     _socket.on("host status", (data) => {
       console.log("방장 여부:", data);
       setIsHost(data.isHost);
     });
-
     _socket.on("update user count", (data) => {
       console.log(`현재 접속 인원: ${data.count}`);
       setCount(data.count);
     });
-
     _socket.on("update active players", (data) => {
       console.log("활성 플레이어 목록 업데이트:", data.players);
       setActivePlayers(data.players);
     });
-
     _socket.on("assigned role", (data) => {
       console.log("역할 배정:", data);
       setRole(data.role);
     });
-
     _socket.on("game started", () => {
       console.log("게임 시작됨!");
       setGameStarted(true);
-      setMessages((prev) => [
-        ...prev,
-        { nickname: "SYSTEM", message: "게임이 시작되었습니다!" },
-      ]);
+      setMessages((prev) => [...prev, { nickname: "SYSTEM", message: "게임이 시작되었습니다!" }]);
     });
-
     _socket.on("phase changed", (data) => {
-      console.log("단계 변경:", data);
       setPhase(data.phase);
       if (data.phase === "night") {
         setInvestigationDone(false);
         setAssassinationDone(false);
+        setSkipUsed(false);
       }
-      setMessages((prev) => [
-        ...prev,
-        { nickname: "SYSTEM", message: `현재 단계: ${data.phase}` },
-      ]);
+      setMessages((prev) => [...prev, { nickname: "SYSTEM", message: `현재 단계: ${data.phase}` }]);
     });
-
     _socket.on("investigation result", (data) => {
       console.log("조사 결과:", data);
       alert(data.message);
     });
+    _socket.on("phase time adjusted", (data) => {
+      console.log("남은 시간 조정:", data.remaining);
+    });
+    _socket.on("kicked", (data) => {
+      alert(data.message);
+      navigate("/lobby");
+    });
 
-    // 브라우저 종료 시 leaveRoom 이벤트 전송
     const handleBeforeUnload = () => {
       _socket.emit("leaveRoom", roomId);
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
-
-    // Cleanup: 언마운트 시 소켓 연결 해제
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       _socket.disconnect();
-    };    
+    };
   };
 
   const disconnectFromChatServer = () => {
@@ -241,68 +383,47 @@ const RoomDetail = () => {
     }
   };
 
-  // ----- 채팅 메시지 전송 -----
-  const sendMessage = () => {
-    if (!socket || !socket.connected) {
-      console.log("소켓이 연결되지 않았습니다.");
-      return;
-    }
+  const sendMessageHandler = () => {
+    if (!socket || !socket.connected) return;
     if (!userInput.trim()) return;
-
     const data = { nickname, message: userInput, roomId };
     console.log("방 채팅 메시지 전송:", data);
     socket.emit("new message", data);
     setUserInput("");
   };
 
-  // ----- 게임 시작 (방장 && 인원 4명 이상) -----
-  const startGame = () => {
-    if (!socket || !socket.connected) {
-      console.log("소켓이 연결되지 않았습니다.");
-      return;
-    }
+  const startGameHandler = async () => {
+    if (!socket || !socket.connected) return;
     if (!isHost || count < 4) {
       console.log("방장이 아니거나 인원이 부족합니다.");
       return;
     }
+
     console.log("게임 시작!");
     socket.emit("start game");
+
+    try {
+      const res = await axios.post(`http://localhost:3000/startGame/${roomId}`);
+      if (res.data.success) {
+        console.log("게임 상태 업데이트 성공!");
+      } else {
+        console.log("게임 상태 업데이트 실패:", res.data.message);
+      }
+    } catch (error) {
+      console.error("게임 상태 업데이트 중 오류 발생:", error);
+    }
   };
 
-  // ----- 경찰 조사 요청 -----
   const handleInvestigation = (targetPlayer) => {
-    if (!socket || !socket.connected) {
-      console.log("소켓이 연결되지 않았습니다.");
-      return;
-    }
+    if (!socket || !socket.connected) return;
     setInvestigationDone(true);
     socket.emit("investigate", targetPlayer, (response) => {
       console.log("조사 요청 응답:", response);
     });
   };
 
-  // 밤 단계 시마다 조사 및 암살 플래그 초기화
-  useEffect(() => {
-    if (phase === "night") {
-      setInvestigationDone(false);
-      setAssassinationDone(false);
-    }
-  }, [phase]);
-
-  // 낮 마다 시민투표
-  useEffect(() => {
-    if (phase === "day") {
-      setVoteDone(false);
-    }
-  }, [phase]);
-  
-
-  // ----- 마피아 투표 처리 -----
   const handleAssassinate = (targetPlayer) => {
-    if (!socket || !socket.connected) {
-      console.log("소켓이 연결되지 않았습니다.");
-      return;
-    }
+    if (!socket || !socket.connected) return;
     setAssassinationDone(true);
     socket.emit("assassinate", targetPlayer, (response) => {
       if (response.success) {
@@ -314,63 +435,72 @@ const RoomDetail = () => {
     });
   };
 
-  // 의사 투표 처리 시작
-  // 보호 처리 함수
-  const handleSave = (targetPlayer) => {
-    if (!socket || !socket.connected) {
-      console.log("소켓이 연결되지 않았습니다.");
+  const handleSkipPhase = () => {
+    if (!socket || !socket.connected) return;
+    if (skipUsed) {
+      alert("이미 스킵 기능을 사용했습니다.");
       return;
     }
-    setSaveDone(true);
-    socket.emit("doctor save", targetPlayer, (response) => {
-      console.log("보호 요청 응답:", response);
+    socket.emit("skip phase", (response) => {
+      if (response.status === "ok") {
+        alert(response.message);
+        setSkipUsed(true);
+      } else {
+        alert(response.message);
+      }
     });
   };
 
-  // 밤 단계 시마다 보호 초기화
+  // 새로 추가된 handleExtendPhase 함수
+  const handleExtendPhase = () => {
+    if (!socket || !socket.connected) return;
+    socket.emit("extend phase", (response) => {
+      if (response.status === "ok") {
+        alert(response.message);
+      } else {
+        alert(response.message);
+      }
+    });
+  };
+
+  // 나가기 버튼 클릭 시 처리
+  const handleExitRoom = async () => {
+    console.log("나가기 버튼 클릭됨");
+    try {
+      const res = await axios.post(`http://localhost:3000/room/exit/${roomId}`);
+      if (res.data.success) {
+        alert("방에서 나갔습니다.");
+        navigate("/lobby");  // 나가기 후 로비로 돌아가기
+      } else {
+        alert("방 나가기 실패");
+      }
+    } catch (err) {
+      console.error("방 나가기 실패", err);
+      alert("오류가 발생했습니다.");
+    }
+  };
+
+  // 마피아가 2명일 때만 채팅창 보여지게끔
+  useEffect(() => {
+    if (activePlayers.length > 0) {
+      const mafiaCnt = activePlayers.filter(player => player.role === "마피아").length;
+      // mafiaCount 상태 업데이트 (사용 예시)
+    }
+  }, [activePlayers]);
+
   useEffect(() => {
     if (phase === "night") {
-      setSaveDone(false);
+      setInvestigationDone(false);
+      setAssassinationDone(false);
+      setSkipUsed(false);
     }
   }, [phase]);
 
-  useEffect(() => {
-    if (!socket) return;
-
-    // 시민 투표 응답 처리
-    socket.on("citizen vote result", (data) => {
-      console.log("시민 투표 결과:", data);
-      alert(data.message);
-    });
-  
-    // 의사 보호 응답 처리
-    socket.on("player saved", (data) => {
-      alert(data.message);
-    });
-  
-    // 플레이어 사망 이벤트 처리
-    socket.on("player killed", (data) => {
-      alert(data.message);
-    });
-  
-    return () => {
-      socket.off("player saved");
-      socket.off("player killed");
-    };
-  }, [socket]);
-
-  // 의사 투표 처리 끝
-
-  if (message) {
-    return <div>{message}</div>;
-  }
-
-  if (!room) {
-    return <div>Loading...</div>;
-  }
+  if (message) return <div>{message}</div>;
+  if (!room) return <div>Loading...</div>;
 
   return (
-    <div className="room-container">
+    <div className="room-container" style={{ padding: "20px", color: "#000" }}>
       <h1>
         <input
           type="text"
@@ -378,36 +508,89 @@ const RoomDetail = () => {
           onChange={(e) => setRoomTitle(e.target.value)}
           className="room-title-input"
           disabled
+          style={{
+            padding: "8px",
+            fontSize: "1.5rem",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+            color: "#000",
+          }}
         />
       </h1>
-      <p>현재 역할: {role || "없음"}</p>
-      <p>현재 접속 인원: {count}</p>
+      <p style={{ color: "#fff" }}>현재 역할: {role || "없음"}</p>
+      <p style={{ color: "#fff" }}>현재 접속 인원 : {room.current_users}</p>
+      <p style={{ color: "#fff" }}>게임 준비 인원: {count}</p>
       <input
         type="text"
         placeholder="유저 이름 입력"
         value={nickname}
         onChange={(e) => setNickname(e.target.value)}
         className="input-field"
+        style={{
+          padding: "8px",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+          marginBottom: "10px",
+          color: "#000",
+        }}
       />
-      {/* 준비 / 준비 해제 버튼 */}
-      <div className="connection-buttons">
-        <button onClick={connectToChatServer} className="btn connect-btn">
-          준비
-        </button>
-        <button onClick={disconnectFromChatServer} className="btn disconnect-btn">
-          준비 해제
-        </button>
-      </div>
-      {/* 방장인 경우 (그리고 인원이 4명 이상이며 게임이 시작되지 않았을 때) 게임 시작 버튼 표시 */}
-      {isHost && count >= 4 && !gameStarted && (
-        <button onClick={startGame} className="btn start-game-btn">
-          게임 시작
-        </button>
+      <ConnectionButtons
+        connectToChatServer={connectToChatServer}
+        disconnectFromChatServer={disconnectFromChatServer}
+        handleExitRoom={handleExitRoom}
+      />
+      <GameControl isHost={isHost} count={count} gameStarted={gameStarted} startGame={startGameHandler} />
+      
+      {/* skip 및 extend 버튼은 'day' 페이즈일 때만 표시 */}
+      {phase === "day" && (
+        <div style={{ margin: "10px 0" }}>
+          {!skipUsed && (
+            <button
+              type="button"
+              onClick={handleSkipPhase}
+              style={{
+                backgroundColor: "#007bff",
+                color: "#fff",
+                border: "none",
+                padding: "5px 10px",
+                borderRadius: "4px",
+              }}
+              className="btn skip-btn"
+            >
+              스킵 (5초 단축)
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleExtendPhase}
+            style={{
+              backgroundColor: "#28a745",
+              color: "#fff",
+              border: "none",
+              padding: "5px 10px",
+              borderRadius: "4px",
+              marginLeft: "10px"
+            }}
+            className="btn extend-btn"
+          >
+            늘리기 (5초 증가)
+          </button>
+        </div>
       )}
+
       <div className="chat-container">
-        <ul className="message-list">
+        <ul
+          className="message-list"
+          style={{
+            height: "300px",
+            overflowY: "scroll",
+            border: "1px solid #ccc",
+            padding: "10px",
+            listStyle: "none",
+          }}
+        >
           {messages.map((m, index) => (
-            <li key={index} className="chat-message">
+            <li key={index} className="chat-message" style={{ height: "50px" }}>
               <span className="chat-username">{m.nickname}:</span> {m.message}
             </li>
           ))}
@@ -419,38 +602,29 @@ const RoomDetail = () => {
           onChange={(e) => setUserInput(e.target.value)}
           className="input-field"
         />
-        <button onClick={sendMessage} className="btn send-btn">
-          보내기
-        </button>
+        <button type="button" onClick={sendMessageHandler} className="btn send-btn">보내기</button>
       </div>
-      {/* 경찰 역할이고 밤 단계일 경우 조사 버튼 */}
+
+      {/* 원본대로 MafiaChat 및 MafiaVote 사용 */}
+      <MafiaChat role={role} nickname={nickname} socket={socket} roomId={roomId} />
+
       {role === "경찰" && phase === "night" && !investigationDone && (
-        <button onClick={() => setShowInvestigationModal(true)} className="btn investigation-btn">
+        <button
+          type="button"
+          onClick={() => setShowInvestigationModal(true)}
+          className="btn investigation-btn"
+          style={{
+            backgroundColor: "#007bff",
+            color: "#fff",
+            border: "none",
+            padding: "5px 10px",
+            borderRadius: "4px",
+            margin: "5px",
+          }}
+        >
           조사하기
         </button>
       )}
-
-      {/* 시민투표 버튼 */}
-      {phase === "day" && !voteDone && (
-        <button onClick={() => setShowCitizenVoteModal(true)} className="btn citizen-vote-btn">
-          시민 투표하기
-        </button>
-      )}
-
-      {/* 시민투표 모달 */}
-      {showCitizenVoteModal && (
-        <CitizenVote
-          activePlayers={activePlayers}
-          onVote={(player) => {
-            handleCitizenVote(player);
-            setShowCitizenVoteModal(false);
-          }}
-          voteDone={voteDone}
-          username={nickname}
-        />
-      )}
-
-      {/* 모달창 조건부 렌더링 */}
       {showInvestigationModal && (
         <InvestigationModal
           activePlayers={activePlayers.filter((player) => player !== nickname)}
@@ -463,33 +637,70 @@ const RoomDetail = () => {
         />
       )}
 
-      {/* 마피아가 누구 죽일지 투표 */}
-      {role === "마피아" && phase === "night" && (
-        <MafiaVote
-          activePlayers={activePlayers} // 활성 플레이어 목록
-          onAssassinate={handleAssassinate} // 암살 처리 함수
-          assassinationDone={assassinationDone} // 암살 완료 여부
-          username={nickname} // 사용자 이름
-        />
-
-      )}
-
-      {/* 의사가 누굴 살릴지 투표 */}
-      {/* UI에 보호 버튼 및 모달 추가 */}
       {role === "의사" && phase === "night" && !saveDone && (
-        <button onClick={() => setShowDoctorModal(true)} className="btn save-btn">
-          보호하기
+        <button
+          type="button"
+          onClick={() => setShowDoctorSaveModal(true)}
+          className="btn investigation-btn"
+          style={{
+            backgroundColor: "#007bff",
+            color: "#fff",
+            border: "none",
+            padding: "5px 10px",
+            borderRadius: "4px",
+            margin: "5px",
+          }}
+        >
+          살리기
         </button>
       )}
-
-      {showDoctorModal && (
-        <DoctorVote
-          activePlayers={activePlayers} // 활성 플레이어 목록
+      {showDoctorSaveModal && ( // 여기에 살리는 로직
+        <DoctorSaveModal
+          activePlayers={activePlayers.filter((player) => player !== nickname)}
+          saveDone={saveDone}
           onSave={(player) => {
             handleSave(player);
-            setShowDoctorModal(false);
+            setShowDoctorSaveModal(false);
           }}
-          saveDone={saveDone}
+          onClose={() => setShowDoctorSaveModal(false)}
+        />
+      )}
+
+      {isHost && (
+        <button
+          type="button"
+          onClick={() => setShowKickModal(true)}
+          className="btn kick-btn"
+          style={{
+            backgroundColor: "#007bff",
+            color: "#fff",
+            border: "none",
+            padding: "5px 10px",
+            borderRadius: "4px",
+            margin: "5px",
+          }}
+        >
+          추방하기
+        </button>
+      )}
+      {showKickModal && (
+        <KickModal
+          activePlayers={activePlayers.filter((player) => player !== nickname)}
+          onKick={(player) => {
+            socket.emit("kick user", player, (response) => {
+              console.log("추방 응답:", response);
+            });
+            setShowKickModal(false);
+          }}
+          onClose={() => setShowKickModal(false)}
+        />
+      )}
+      {role === "마피아" && phase === "night" && (
+        <MafiaVote
+          activePlayers={activePlayers}
+          nickname={nickname}
+          assassinationDone={assassinationDone}
+          handleAssassinate={handleAssassinate}
         />
       )}
     </div>

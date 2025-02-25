@@ -43,6 +43,8 @@ npm install @react-oauth/google
 // 구글 로그인 사용자 정보 확인
 npm install jwt-decode
 
+// 이미지 관련 라이브러리리
+npm install multer
 
 // .env 코드
 PORT=3000

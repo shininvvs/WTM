@@ -34,15 +34,37 @@ export const checkUserEmailService = async (email) => {
   return await checkDuplicate('email', email);
 };
 
-// ✅ 회원 정보를 DB에 저장하는 서비스 함수 (이메일 추가됨)
-export const saveUserToDatabase = async (user_id, user_pwd, user_nickname, email) => {
+// ✅ 회원 정보를 DB에 저장하는 서비스 함수 (프로필 이미지 포함)
+export const saveUserToDatabase = async (user_id, user_pwd, user_nickname, email, user_gender, profile_img) => {
   try {
-    const query = `INSERT INTO tb_user (user_id, user_pwd, user_nickname, email) VALUES (?, ?, ?, ?)`;
-    const [result] = await pool.execute(query, [user_id, user_pwd, user_nickname, email]);
+    const query = `INSERT INTO tb_user (user_id, user_pwd, user_nickname, email, user_gender, profile_img) VALUES (?, ?, ?, ?, ?, ?)`;
+    const [result] = await pool.execute(query, [user_id, user_pwd, user_nickname, email, user_gender, profile_img]);
 
     return result.affectedRows > 0;  // ✅ 성공적으로 저장되면 true 반환
   } catch (error) {
     console.error('❌ DB 저장 오류:', error);
+    return false;
+  }
+};
+
+// ✅ 특정 유저의 프로필 이미지 가져오기
+export const getUserProfileImage = async (user_id) => {
+  try {
+    const [rows] = await pool.execute("SELECT profile_img FROM tb_user WHERE user_id = ?", [user_id]);
+    return rows.length ? rows[0].profile_img : null;
+  } catch (error) {
+    console.error("❌ 프로필 이미지 조회 오류:", error);
+    return null;
+  }
+};
+
+// ✅ 유저의 프로필 이미지 업데이트
+export const updateUserProfileImage = async (user_id, profile_img) => {
+  try {
+    await pool.execute("UPDATE tb_user SET profile_img = ? WHERE user_id = ?", [profile_img, user_id]);
+    return true;
+  } catch (error) {
+    console.error("❌ 프로필 이미지 업데이트 오류:", error);
     return false;
   }
 };

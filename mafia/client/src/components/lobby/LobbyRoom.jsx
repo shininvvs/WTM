@@ -39,44 +39,89 @@ const LobbyRoom = () => {
   };
 
   // 방 만들기 처리
-  const handleCreateRoom = async (event) => {
-    event.preventDefault();
-    const newRoom = {
-      roomName,
-      password: isPasswordProtected ? password : null, 
-    };
-    console.log("방 생성 요청 데이터:", newRoom);  // 요청 확인
-    try {
-      const res = await axios.post("http://localhost:3000/createRoom", newRoom);
-      console.log("방 생성 응답 데이터:", res.data);  // 응답 확인
-      if (res.data.success) {
-        const roomId = res.data.room.room_id;
-        setShowModal(false);
-        console.log("Navigating to:", `/room/${roomId}`); // 콘솔 출력
-        navigate(`/room/${roomId}`);
-      } else {
-        setMessage("방 생성에 실패했습니다.");
-      }
-    } catch (err) {
-      console.error("방 생성 실패:", err);
-      setMessage("방 생성 중 오류가 발생했습니다.");
-    }
+  // 방 만들기 처리
+const handleCreateRoom = async (event) => {
+  event.preventDefault();
+  const newRoom = {
+    roomName,
+    password: isPasswordProtected ? password : null, 
   };
+  console.log("방 생성 요청 데이터:", newRoom);  // 요청 확인
 
-  // 입장 및 비밀번호 처리 함수 (handleJoinRoom + handlePasswordSubmit 합침)
+  try {
+    const res = await axios.post("http://localhost:3000/createRoom", newRoom);
+    console.log("방 생성 응답 데이터:", res.data);  // 응답 확인
+
+    if (res.data.success) {
+      const roomId = res.data.room.room_id;
+      setShowModal(false);
+      console.log("Navigating to:", `/room/${roomId}`); // 콘솔 출력
+      // 방 생성 후에만 navigate 호출
+      navigate(`/room/${roomId}`);
+    } else {
+      setMessage("방 생성에 실패했습니다.");
+    }
+  } catch (err) {
+    console.error("방 생성 실패:", err);
+    setMessage("방 생성 중 오류가 발생했습니다.");
+  }
+};
+
+
+// 방 입장 처리 함수
+// 방 입장 처리 함수
 const handleJoinRoom = async (room) => {
   console.log("handleJoinRoom 실행됨", room);
   setSelectedRoom(room);  // 선택된 방 저장
   console.log("선택한 방 : ", room);
 
-  // 비밀번호가 있으면 모달을 열고, 없으면 바로 입장
+  // 비밀번호가 있는 방이라면 모달을 띄우고, 없으면 바로 입장
   if (room.room_pwd) {
     setPassword("");  // 비밀번호 초기화
     setShowPasswordModal(true);  // 비밀번호 모달 열기
   } else {
-    navigate(`/room/${room.room_id}`);  // 비밀번호 없이 바로 입장
+    try {
+      // 비밀번호가 없으면 바로 입장
+      const res = await axios.post(`http://localhost:3000/room/join/${room.room_id}`);
+      console.log('방 입장 처리');
+
+      if (res.data.success) {
+        navigate(`/room/${room.room_id}`);  // 비밀번호 없이 바로 입장
+      } else {
+        alert("방 입장 실패");
+      }
+    } catch (err) {
+      console.error("방 입장 실패", err);
+      alert("오류가 발생했습니다.");
+    }
   }
 };
+
+// 비밀번호 제출 처리 함수
+const handlePasswordSubmit = async () => {
+  if (password === selectedRoom.room_pwd) {
+    setShowPasswordModal(false);  // 모달 닫기
+    try {
+      const res = await axios.post(`http://localhost:3000/room/join/${selectedRoom.room_id}`);
+      console.log('방 입장 처리');
+
+      if (res.data.success) {
+        navigate(`/room/${selectedRoom.room_id}`);  // 비밀번호가 맞으면 입장
+      } else {
+        alert("방 입장 실패");
+      }
+    } catch (err) {
+      console.error("방 입장 실패", err);
+      alert("오류가 발생했습니다.");
+    }
+  } else {
+    alert("비밀번호가 틀렸습니다.");
+    setPassword("");  // 비밀번호 입력값 초기화
+  }
+};
+
+
+
 
 // 로그아웃 : 비밀번호 입력 후 입장 처리 (handlePasswordSubmit을 합친 형태)
 const logout = async () => {
@@ -113,6 +158,7 @@ const mypage = () => {
           rooms.map((room) => (
             <li key={room.room_id} className="room-item">
               <div className="room-info">
+                <strong className="room-id">{room.room_id}</strong>
                 <strong className="room-name">{room.room_name}</strong>
                 <span className="room-users">현재 인원: {room.current_users}</span>
               </div>

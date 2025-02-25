@@ -48,6 +48,7 @@ const Login = () => {
         setTimeout(() => navigate('/lobby'), 1500);
       }
     } catch (error) {
+      console.error("❌ 로그인 실패:", error);
       setMessage(error.response?.data?.message || '❌ 로그인 실패. 다시 시도해주세요.');
       setForm({ user_id: '', user_pwd: '' });
     }
@@ -73,6 +74,7 @@ const Login = () => {
         setTimeout(() => navigate('/lobby'), 1500);
       }
     } catch (error) {
+      console.error("❌ Google 로그인 실패:", error);
       setMessage(error.response?.data?.message || '❌ Google 로그인 실패. 다시 시도해주세요.');
     }
   };
@@ -85,7 +87,6 @@ const Login = () => {
     return;
   }
 
-  // 카카오 로그인
   window.Kakao.Auth.login({
     scope: 'profile_nickname',
     success: async (authObj) => {

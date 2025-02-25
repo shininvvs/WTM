@@ -1,9 +1,9 @@
 import express from 'express';
-import { joinRoom } from '../../controllers/lobby/joinRoomController.js';  // named import
+import { startGame } from '../../controllers/mafiaGame/startGameController.js';  // named import
 
 const router = express.Router();
 
 // 방 접속 라우터
-router.get('/:roomId', joinRoom);
+router.post('/:roomId', startGame);
 
 export default router;  // default export

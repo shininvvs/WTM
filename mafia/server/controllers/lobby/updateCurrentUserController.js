@@ -1,12 +1,14 @@
-import * as lobbyService from '../../services/lobby/joinRoomService.js';  // named import
+// 방 입장시 접속인원 증가시키기 위한 컨트롤러
+import * as updateCurrentUserService from '../../services/lobby/updateCurrentUserService.js';
 
-const joinRoom = async (req, res) => {
+
+const updateCurrentUserController = async (req, res) => {
     const { roomId } = req.params;  // URL에서 roomId를 추출
     console.log("요청 받은 roomId:", roomId);
 
     try {
-        // 방 정보를 가져옴
-        const room = await lobbyService.getRoomInfo(roomId);
+        // 방 정보 가져오기
+        const room = await updateCurrentUserService.getJoinRoomInfo(roomId);
 
         if (!room) {
             return res.status(404).json({ success: false, message: "방을 찾을 수 없습니다." });
@@ -18,13 +20,18 @@ const joinRoom = async (req, res) => {
             return res.status(400).json({ success: false, message: "비밀번호가 일치하지 않습니다." });
         }
 
-        // 방 정보 반환 (current_users 증가 X)
+        // 입장 시 current_users 증가
+        const updatedRoom = await updateCurrentUserService.incrementRoomUsers(roomId);
+        if (!updatedRoom) {
+            return res.status(500).json({ success: false, message: "방 입장 처리 중 오류가 발생했습니다." });
+        }
+
         return res.status(200).json({ 
             success: true, 
             room: { 
-                room_id: room.room_id,
-                room_name: room.room_name,
-                current_users: room.current_users
+                room_id: updatedRoom.room_id,
+                room_name: updatedRoom.room_name,
+                current_users: updatedRoom.current_users
             }
         });
     } catch (error) {
@@ -33,4 +40,4 @@ const joinRoom = async (req, res) => {
     }
 };
 
-export { joinRoom };
+export { updateCurrentUserController };

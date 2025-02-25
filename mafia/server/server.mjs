@@ -91,6 +91,33 @@ io.on("connection", (socket) => {
   });
 });
 
+  // mafiaGame 관련 소켓 설정
+  io.on("connection", (socket) => {
+    // 연결된 클라이언트의 정보를 확인
+    socket.on("joinRoom", (data) => {
+      console.log("Received joinRoom data:", data); // 이 부분을 통해 role과 다른 정보 확인
+  
+      const { nickname, role, roomId } = data;
+      console.log(`닉네임: ${nickname}, 역할: ${role}, 방 ID: ${roomId}`); // 로그로 출력
+  
+      if (role === "마피아") {
+        // 마피아 메시지를 받을 준비
+        socket.on("mafiaMessage", (message) => {
+          //console.log(`Received mafia message from ${message.sender}: ${message.text}`);
+  
+          // 같은 방에 있는 모든 마피아에게 메시지 전송
+          socket.to(roomId).emit("mafiaMessage", message);
+        });
+      }
+  
+      // 클라이언트 연결 해제 시 처리
+      socket.on("disconnect", () => {
+        //console.log(`${nickname} disconnected`);
+      });
+    });
+  });
+  
+
 // 현재 roomId의 사용자 수를 반환하는 함수
 function getUserCount(roomId) {
   const room = io.sockets.adapter.rooms.get(roomId);

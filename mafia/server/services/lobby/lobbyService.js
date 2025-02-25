@@ -3,7 +3,7 @@ import db from "../../config/database.js";  // MySQL 데이터베이스 연결
 
 const getRooms = async () => {
   try {
-    const query = "SELECT room_id, room_name, room_pwd, current_users FROM ROOMS";
+    const query = "SELECT room_id, room_name, room_pwd, current_users FROM ROOMS WHERE current_users > 0 ORDER BY room_id DESC;";
     //console.log("방목록 쿼리문 : ", query);
     const [rows] = await db.query(query);
     return rows;

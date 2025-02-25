@@ -3,12 +3,18 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import loginRoutes from './routes/login/loginRoutes.js';
 import registerRoutes from './routes/register/registerRoutes.js';
+import profileRoutes from "./routes/register/registerRoutes.js";
 import mypageRoutes from './routes/user/mypageRoutes.js';
 import findRoutes from "./routes/user/findRoutes.js";
+import path from "path";
+import { fileURLToPath } from "url";
 import lobbyRoutes from "./routes/lobby/lobbyRoutes.js";
 import createRoomRoutes from "./routes/lobby/createRoomRoutes.js";
 import userManagementRoutes from "./routes/admin/userManagementRoutes.js";
 import joinRoomRoutes from "./routes/lobby/joinRoomRoutes.js";
+import exitRoomRoutes from "./routes/lobby/exitRoomRoutes.js";  // 방 나가기 라우터
+import updateCurrentUser from "./routes/lobby/updateCurrentUserRoutes.js";  // 접속인원 증가시키기 라우터
+import startGame  from './routes/mafiaGame/startGameRoutes.js'; // 게임 시작시 방상태 업데이트 라우터
 import pool from './config/database.js';  // ✅ DB 연결 풀 import
 
 dotenv.config();
@@ -56,6 +62,9 @@ app.get("/room/:roomId", async (req, res) => {
 });
 */
 
+// 방 입장시 접속인원 증가시키는 라우터
+app.use('/room/join', updateCurrentUser);
+
 // ✅ 회원가입 및 로그인 API
 app.use('/login', loginRoutes);
 app.use('/register', registerRoutes); // 회원가입 관련 API
@@ -63,6 +72,16 @@ app.use('/register', registerRoutes); // 회원가입 관련 API
 // ✅ 아이디 & 닉네임 중복 체크 API (올바르게 수정)
 app.use('/check-id', registerRoutes);
 app.use('/check-nickname', registerRoutes);
+
+// ✅ 프로필 관리 API (업데이트 및 삭제)
+app.use("/profile", profileRoutes);
+
+// 현재 파일의 경로와 디렉토리 경로를 구함
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// uploads 폴더를 정적 파일 경로로 설정
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // 마이페이지
 app.use('/mypage', mypageRoutes);
@@ -158,7 +177,15 @@ app.use("/lobby", (req, res, next) => {
   next();
 }, lobbyRoutes); 
 
+// 게임 시작시 방 상태 변경 라우터
+app.use("/startGame", startGame);
+
+
+// 방 생성 라우터
 app.use("/createRoom", createRoomRoutes);
+
+// 방 나가기 라우터
+app.use('/room/exit', exitRoomRoutes);
 
 // ✅ 404 처리 (잘못된 경로 요청 시)
 app.use((req, res, next) => {

@@ -1,0 +1,85 @@
+.mafia-chat {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
+  background: #222;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  font-family: Arial, sans-serif;
+}
+
+.mafia-chat h3 {
+  margin: 0;
+  padding-bottom: 8px;
+  font-size: 16px;
+  text-align: center;
+  border-bottom: 2px solid #ff4747;
+}
+
+.chat-box {
+  height: 200px;
+  overflow-y: auto;
+  background: #333;
+  padding: 8px;
+  border-radius: 5px;
+  margin-bottom: 8px;
+}
+
+.chat-box p {
+  margin: 5px 0;
+  padding: 5px;
+  background: #444;
+  border-radius: 5px;
+  font-size: 14px;
+  display: inline-block;
+  max-width: 80%;
+}
+
+.chat-box p strong {
+  color: #ff4747;
+}
+
+/* 자기 메시지 - 오른쪽 정렬 */
+.chat-box p.sent {
+  background: #ff4747;
+  color: white;
+  text-align: right;
+  float: right;
+  clear: both;
+}
+
+/* 상대방 메시지 - 왼쪽 정렬 */
+.chat-box p.received {
+  background: #444;
+  color: white;
+  text-align: left;
+  float: left;
+  clear: both;
+}
+
+.mafia-chat input {
+  width: calc(100% - 60px);
+  padding: 5px;
+  border: none;
+  border-radius: 5px;
+  background: #444;
+  color: #fff;
+  margin-right: 5px;
+}
+
+.mafia-chat button {
+  background: #ff4747;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.mafia-chat button:hover {
+  background: #ff1c1c;
+}

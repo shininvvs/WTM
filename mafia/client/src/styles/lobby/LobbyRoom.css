@@ -20,11 +20,15 @@
     font-size: 1rem;
     margin-bottom: 20px;
   }
-  
+
   .room-list {
+    max-height: 400px;  /* 방 목록의 최대 높이를 설정 */
+    overflow-y: auto;   /* 세로 방향으로 스크롤이 생기도록 설정 */
+    margin-bottom: 20px; /* 필요에 따라 여백 조정 */
     list-style-type: none; /* 기본 동그라미 없애기 */
     padding: 0;
   }
+  
   
   .room-item {
     width: 350px;
@@ -42,6 +46,12 @@
   .room-info {
     display: flex;
     flex-direction: column;
+  }
+
+  .room-id {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color : black;
   }
   
   .room-name {
